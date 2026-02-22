@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Photo Name Date Joiner</title>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f4f6f9;
+        margin: 0;
+        padding: 0;
+        text-align: center;
+    }
+
+    header {
+        background: #111827;
+        color: white;
+        padding: 15px;
+        font-size: 22px;
+        font-weight: bold;
+    }
+
+    .container {
+        max-width: 900px;
+        margin: 30px auto;
+        background: white;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .flex {
+        display: flex;
+        gap: 30px;
+        justify-content: center;
+        align-items: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .form-section {
+        flex: 1;
+        min-width: 250px;
+        text-align: left;
+    }
+
+    .preview-section {
+        flex: 1;
+        min-width: 250px;
+    }
+
+    input {
+        width: 100%;
+        padding: 8px;
+        margin: 8px 0 15px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+    }
+
+    button {
+        padding: 10px 20px;
+        border: none;
+        background: #2563eb;
+        color: white;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    button:hover {
+        background: #1d4ed8;
+    }
+
+    .preview-box {
+        border: 2px solid #ddd;
+        display: inline-block;
+        background: black;
+    }
+
+    canvas {
+        display: block;
+    }
+
+    .footer-text {
+        color: white;
+        padding: 8px;
+        font-size: 14px;
+        background: black;
+    }
+
+    @media(max-width:600px){
+        .flex{
+            flex-direction: column;
+        }
+    }
+</style>
+</head>
+<body>
+
+<header>
+    📸 Photo Name Date Joiner
+</header>
+
+<div class="container">
+    <div class="flex">
+
+        <div class="form-section">
+            <label>Select Photo</label>
+            <input type="file" id="imageInput" accept="image/*">
+
+            <label>Your Name</label>
+            <input type="text" id="nameInput" placeholder="Enter Your Name">
+
+            <label>Date of Photo</label>
+            <input type="text" id="dateInput" placeholder="Enter Photo Date">
+
+            <button onclick="combineAndDownload()">Combine & Download</button>
+        </div>
+
+        <div class="preview-section">
+            <div class="preview-box">
+                <canvas id="previewCanvas"></canvas>
+                <div class="footer-text">
+                    Name : Preview <br>
+                    DOP : Preview
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<canvas id="outputCanvas" style="display:none;"></canvas>
+
+<script>
+const imageInput = document.getElementById("imageInput");
+const previewCanvas = document.getElementById("previewCanvas");
+const ctxPreview = previewCanvas.getContext("2d");
+
+imageInput.addEventListener("change", function(){
+    const file = this.files[0];
+    const img = new Image();
+    img.onload = function(){
+        previewCanvas.width = 300;
+        previewCanvas.height = 330;
+        ctxPreview.drawImage(img, 0, 0, 300, 330);
+    }
+    img.src = URL.createObjectURL(file);
+});
+
+function combineAndDownload(){
+    const name = document.getElementById("nameInput").value;
+    const date = document.getElementById("dateInput").value;
+    const file = imageInput.files[0];
+
+    if(!file){
+        alert("Please select an image!");
+        return;
+    }
+
+    const img = new Image();
+    const outputCanvas = document.getElementById("outputCanvas");
+    const ctx = outputCanvas.getContext("2d");
+
+    img.onload = function(){
+        const imgHeight = 330;
+        const textHeight = 70;
+
+        outputCanvas.width = 300;
+        outputCanvas.height = imgHeight + textHeight;
+
+        ctx.drawImage(img, 0, 0, 300, imgHeight);
+
+        ctx.fillStyle = "black";
+        ctx.fillRect(0, imgHeight, 300, textHeight);
+
+        ctx.fillStyle = "white";
+        ctx.font = "bold 16px Arial";
+        ctx.textAlign = "center";
+
+        ctx.fillText("Name : " + name, 150, imgHeight + 25);
+        ctx.fillText("DOP : " + date, 150, imgHeight + 50);
+
+        const link = document.createElement("a");
+        link.download = "Photo-Name-Date.jpg";
+        link.href = outputCanvas.toDataURL("image/jpeg", 1.0);
+        link.click();
+    }
+
+    img.src = URL.createObjectURL(file);
+}
+</script>
+
+</body>
+</html>
